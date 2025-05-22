@@ -36,6 +36,8 @@ const CornerstoneViewportDownloadForm = ({
     width: DEFAULT_SIZE,
     height: DEFAULT_SIZE,
   });
+  const urlParams = new URLSearchParams(window.location.search);
+  const StudyInstanceUIDs = urlParams.get('StudyInstanceUIDs');
 
   const warningState = customizationService.getCustomization('viewportDownload.warningMessage') as {
     enabled: boolean;
@@ -220,6 +222,54 @@ const CornerstoneViewportDownloadForm = ({
     link.click();
   };
 
+  const handleSaveToPacs = async (filename: string, fileType: string) => {
+    const divForDownloadViewport = document.querySelector(
+      `div[data-viewport-uid="${VIEWPORT_ID}"]`
+    );
+
+    if (!divForDownloadViewport) {
+      console.debug('No viewport found for PACS save');
+      return;
+    }
+
+    // Render the viewport to a canvas
+    const canvas = await html2canvas(divForDownloadViewport as HTMLElement);
+
+    // Convert the canvas to a Blob (image file)
+    return new Promise<void>((resolve, reject) => {
+      canvas.toBlob(
+        async (blob: Blob | null) => {
+          if (!blob) {
+            console.error('Failed to create image blob');
+            reject();
+            return;
+          }
+
+          try {
+            const formData = new FormData();
+            formData.append('image', blob, `${filename || 'image'}.${fileType}`);
+            formData.append('studyId', StudyInstanceUIDs);
+
+            await fetch('http://localhost:3990/worklists/save-image', {
+              method: 'POST',
+              body: formData,
+              headers: {
+                Authorization: 'Basic ' + btoa('superadmin@pacs.co.id:pacs1234'),
+              },
+            });
+
+            resolve();
+          } catch (error) {
+            console.error('Error saving image to PACS:', error);
+            reject(error);
+          }
+        },
+        `image/${fileType}`,
+        1.0
+      );
+    });
+  };
+
   const ViewportDownloadFormNew = customizationService.getCustomization(
     'ohif.captureViewportModal'
   );
@@ -237,6 +287,7 @@ const CornerstoneViewportDownloadForm = ({
       onEnableViewport={handleEnableViewport}
       onDisableViewport={handleDisableViewport}
       onDownload={handleDownload}
+      onSaveToPacs={handleSaveToPacs}
       warningState={warningState}
     />
   );

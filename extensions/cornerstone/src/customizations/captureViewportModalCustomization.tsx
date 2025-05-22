@@ -16,6 +16,7 @@ interface ViewportDownloadFormNewProps {
   onEnableViewport: (element: HTMLElement) => void;
   onDisableViewport: () => void;
   onDownload: (filename: string, fileType: string) => void;
+  onSaveToPacs: (filename: string, fileType: string) => void;
   warningState: { enabled: boolean; value: string };
 }
 
@@ -32,6 +33,7 @@ function ViewportDownloadFormNew({
   onEnableViewport,
   onDisableViewport,
   onDownload,
+  onSaveToPacs,
 }: ViewportDownloadFormNewProps) {
   const [viewportElement, setViewportElement] = useState<HTMLElement | null>(null);
   const [showWarningMessage, setShowWarningMessage] = useState(true);
@@ -131,6 +133,14 @@ function ViewportDownloadFormNew({
           <FooterAction className="mt-2">
             <FooterAction.Right>
               <FooterAction.Secondary onClick={onClose}>Cancel</FooterAction.Secondary>
+              <FooterAction.Primary
+                onClick={() => {
+                  onSaveToPacs(filename || DEFAULT_FILENAME, fileType);
+                  onClose();
+                }}
+              >
+                Save to PACS
+              </FooterAction.Primary>
               <FooterAction.Primary
                 onClick={() => {
                   onDownload(filename || DEFAULT_FILENAME, fileType);
