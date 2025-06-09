@@ -247,7 +247,7 @@ const CornerstoneViewportDownloadForm = ({
 
           try {
             const formData = new FormData();
-            formData.append('image', blob, `${filename || 'image'}.${fileType}`);
+            formData.append('image', blob, `${StudyInstanceUIDs}.${fileType}`);
             formData.append('studyId', StudyInstanceUIDs);
 
             await fetch('http://localhost:3990/worklists/save-image', {
