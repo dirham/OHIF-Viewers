@@ -30,7 +30,8 @@ const CornerstoneViewportDownloadForm = ({
   activeViewportId: activeViewportIdProp,
 }: ViewportDownloadFormProps) => {
   const { servicesManager } = useSystem();
-  const { customizationService, cornerstoneViewportService } = servicesManager.services;
+  const { customizationService, cornerstoneViewportService, uiNotificationService } =
+    servicesManager.services;
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [viewportDimensions, setViewportDimensions] = useState({
     width: DEFAULT_SIZE,
@@ -258,9 +259,26 @@ const CornerstoneViewportDownloadForm = ({
               },
             });
 
+            // Show success toast after successful save
+            uiNotificationService.show({
+              title: 'Save to PACS',
+              message: 'Image saved to PACS successfully',
+              type: 'success',
+              duration: 3000,
+            });
+
             resolve();
           } catch (error) {
             console.error('Error saving image to PACS:', error);
+
+            // Show error toast if save fails
+            uiNotificationService.show({
+              title: 'Save to PACS',
+              message: 'Failed to save image to PACS',
+              type: 'error',
+              duration: 5000,
+            });
+
             reject(error);
           }
         },

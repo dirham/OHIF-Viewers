@@ -134,9 +134,14 @@ function ViewportDownloadFormNew({
             <FooterAction.Right>
               <FooterAction.Secondary onClick={onClose}>Cancel</FooterAction.Secondary>
               <FooterAction.Primary
-                onClick={() => {
-                  onSaveToPacs(filename || DEFAULT_FILENAME, fileType);
-                  onClose();
+                onClick={async () => {
+                  try {
+                    await onSaveToPacs(filename || DEFAULT_FILENAME, fileType);
+                    onClose();
+                  } catch (error) {
+                    // Error is already handled in the onSaveToPacs function
+                    console.error('PACS save failed:', error);
+                  }
                 }}
               >
                 Save to PACS
